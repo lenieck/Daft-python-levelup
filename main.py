@@ -63,11 +63,6 @@ def register(pacjent: Patient):
 
     vacc_date = today + timedelta(days=all_len)
     d1 = today.strftime("%Y-%m-%d")
-    patients[0].append(int(app.counter))
-    patients[1].append(pacjent.name)
-    patients[2].append(pacjent.surname)
-    patients[3].append(str(d1))
-    patients[4].append(str(vacc_date))
     return {"id": app.counter, **pacjent.dict(), "register_date": d1, "vaccination_date": vacc_date}
 
 @app.get("/patient/{id}",status_code=200)
