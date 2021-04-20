@@ -4,6 +4,7 @@ from hashlib import sha512
 from typing import Optional
 
 app = FastAPI()
+app.counter = 0
 
 @app.get("/")
 def root():
@@ -36,3 +37,13 @@ def auth(password: Optional[str] = None, password_hash: Optional[str] = None):
     password = password.encode()
     if sha512(password).hexdigest() != password_hash:
         raise HTTPException(status_code=401)
+        
+@app.post("/register", status_code=201)
+def register(patient: Patient):
+    app.counter += 1
+    today = date.today()
+    register_date = str(today)
+    name_length = len([i for i in patient.name if i.isalpha()])
+    surname_length = len([i for i in patient.surname if i.isalpha()])
+    vaccination_date = today + timedelta(days=(name_length + surname_length))
+    return {"id": app.counter, "name:":  patient.name, "surname:": patient.surname, "register_date": register_date, "vaccination_date": vaccination_date}
