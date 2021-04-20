@@ -55,7 +55,7 @@ def register(patient: Patient):
     surname_length = len([i for i in patient.surname if i.isalpha()])
     vaccination_date = today + timedelta(days=(name_length + surname_length))
     return {"id": app.counter, "name:":  patient.name, "surname:": patient.surname, "register_date": register_date, "vaccination_date": vaccination_date}
-    
+
 @app.get("/patient/{id}",status_code=200)
 def patient_view(id: int):
     if id > 0 and id <= app.counter:
