@@ -58,7 +58,10 @@ def register(patient: PatientRegister):
     app.counter += 1
     register_date = datetime.today().strftime('%Y-%m-%d')
     Patient.register_date = register_date
-    vacc_days = len([i for i in patient.name+patient.surname if i.isalpha()])
+    vacc_days = 0
+    for i in patient.name + patient.surname:
+        if i.isalpha():
+            vacc_days += 1
     vacc_date = datetime.today() + timedelta(days=vacc_days)
     vacc_date = vacc_date.strftime('%Y-%m-%d')
     patient_data = Patient(id=app.counter, name=patient.name, surname=patient.surname, register_date=register_date, vaccination_date=vacc_date)
