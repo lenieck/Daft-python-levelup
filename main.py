@@ -65,7 +65,7 @@ def register(patient: PatientRegister):
     vacc_date = datetime.today() + timedelta(days=vacc_days)
     vacc_date = vacc_date.strftime('%Y-%m-%d')
     patient_data = Patient(id=app.counter, name=patient.name, surname=patient.surname, register_date=register_date, vaccination_date=vacc_date)
-    app.patients[app.counter] = patient_data
+    app.patients[app.counter] = dict(patient_data)
     return patient_data
 
 @app.get("/patient/{id}",status_code=200)
@@ -83,5 +83,5 @@ def patient_view(id: int):
         return response
     elif id < 1:
         raise HTTPException(status_code=400)
-    elif id > app.counter:
+    else:
         raise HTTPException(status_code=404)
