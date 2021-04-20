@@ -42,6 +42,10 @@ def auth(password: Optional[str] = None, password_hash: Optional[str] = None):
     if sha512(password).hexdigest() != password_hash:
         raise HTTPException(status_code=401)
         
+class Patient(BaseModel):
+    name: str
+    surname: str
+        
 @app.post("/register", status_code=201)
 def register(patient: Patient):
     app.counter += 1
