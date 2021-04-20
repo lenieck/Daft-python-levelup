@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 
 app = FastAPI()
 app.counter = 0
-patients = [[], [], [], [], []]
+app.patients = dict()
 
 @app.get("/")
 def root():
@@ -65,6 +65,7 @@ def register(patient: PatientRegister):
     app.patients[app.counter] = patient_data
     return patient_data
 
+'''
 @app.get("/patient/{id}",status_code=200)
 def patient_view(id: int):
     if id > 0 and id <= app.counter:
@@ -72,3 +73,4 @@ def patient_view(id: int):
         raise HTTPException(status_code=400)
     elif id > app.counter:
         raise HTTPException(status_code=404)
+'''
