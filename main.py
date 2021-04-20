@@ -3,8 +3,8 @@ from fastapi import FastAPI, Response, status
 from fastapi import FastAPI, HTTPException
 from hashlib import sha512
 from typing import Optional
-from datetime import date, timedelta
 from pydantic import BaseModel
+from datetime import datetime, timedelta
 
 app = FastAPI()
 app.counter = 0
@@ -42,24 +42,32 @@ def auth(password: Optional[str] = None, password_hash: Optional[str] = None):
     if sha512(password).hexdigest() != password_hash:
         raise HTTPException(status_code=401)
         
-class Patient(BaseModel):
+class PatientRegister(BaseModel):
     name: str
     surname: str
 
+class Patient(BaseModel):
+    id: int
+    name: str
+    surname: str
+    register_date: str
+    vaccination_date: str
+
 @app.post("/register", status_code=201)
-def register(patient: Patient):
+def register(patient: PatientRegister):
     app.counter += 1
-    today = date.today()
-    register_date = str(today)
-    name_length = len([i for i in patient.name if i.isalpha()])
-    surname_length = len([i for i in patient.surname if i.isalpha()])
-    vaccination_date = today + timedelta(days=(name_length + surname_length))
-    return {"id": app.counter, "name:":  patient.name, "surname:": patient.surname, "register_date": register_date, "vaccination_date": vaccination_date}
+    register_date = datetime.today().strftime('%Y-%m-%d')
+    Patient.register_date = register_date
+    vacc_days = len([i for i in patient.name+patient.surname if i.isalpha()])
+    vacc_date = datetime.today() + timedelta(days=vacc_days)
+    vacc_date = vacc_date.strftime('%Y-%m-%d')
+    patient_data = Patient(id=app.counter, name=patient.name, surname=patient.surname, register_date=register_date, vaccination_date=vacc_date)
+    app.patients[app.counter] = patient_data
+    return patient_data
 
 @app.get("/patient/{id}",status_code=200)
 def patient_view(id: int):
     if id > 0 and id <= app.counter:
-        return {"id": id, "name:":  patients[1][id-1], "surname:": patients[2][id-1], "register_date": patients[3][id-1], "vaccination_date": patients[4][id-1]}
     elif id < 1:
         raise HTTPException(status_code=400)
     elif id > app.counter:
