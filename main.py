@@ -47,19 +47,28 @@ class Patient(BaseModel):
     surname: str
         
 @app.post("/register", status_code=201)
-def register(patient: Patient):
+def register(pacjent: Patient):
     app.counter += 1
+    name_len = 0
+    surname_len = 0
     today = date.today()
-    register_date = str(today)
-    name_length = len([i for i in patient.name if i.isalpha()])
-    surname_length = len([i for i in patient.surname if i.isalpha()])
-    vaccination_date = today + timedelta(days=(name_length + surname_length))
+    for i in range(len(pacjent.name)):
+        if (pacjent.name[i].isalpha()):
+            name_len += 1
+    for i in range(len(pacjent.surname)):
+        if (pacjent.surname[i].isalpha()):
+            surname_len += 1
+
+    all_len = name_len + surname_len
+
+    vacc_date = today + timedelta(days=all_len)
+    d1 = today.strftime("%Y-%m-%d")
     patients[0].append(int(app.counter))
-    patients[1].append(patient.name)
-    patients[2].append(patient.surname)
-    patients[3].append(str(register_date))
-    patients[4].append(str(vaccination_date))
-    return {"id": app.counter, "name:":  patient.name, "surname:": patient.surname, "register_date": register_date, "vaccination_date": vaccination_date}
+    patients[1].append(pacjent.name)
+    patients[2].append(pacjent.surname)
+    patients[3].append(str(d1))
+    patients[4].append(str(vacc_date))
+    return {"id": app.counter, **pacjent.dict(), "register_date": d1, "vaccination_date": vacc_date}
 
 @app.get("/patient/{id}",status_code=200)
 def patient_view(id: int):
