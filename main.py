@@ -68,12 +68,20 @@ def register(patient: PatientRegister):
     app.patients[app.counter] = patient_data
     return patient_data
 
-'''
 @app.get("/patient/{id}",status_code=200)
 def patient_view(id: int):
-    if id > 0 and id <= app.counter:
+    id = int(id)
+    if id in app.patients:
+        patient = app.patients[id]
+        response = Patient(
+            id=id,
+            name=patient['name'],
+            surname=patient['surname'],
+            register_date=patient['register_date'],
+            vaccination_date=patient['vaccination_date']
+        )
+        return response
     elif id < 1:
         raise HTTPException(status_code=400)
     elif id > app.counter:
         raise HTTPException(status_code=404)
-'''
