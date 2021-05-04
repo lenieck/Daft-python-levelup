@@ -96,7 +96,12 @@ app.login_tokens = []
 def login_session(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
     if credentials.username == "4dm1n" or credentials.password == "NotSoSecurePa$$":
         session_token = sha256(f"4dm1nNotSoSecurePa$${app.secret_key}".encode()).hexdigest()
-        app.access_tokens.append(session_token)
+        if len(app.access_tokens) < 3:
+            app.access_tokens.append(session_token)
+        else:
+            app.access_tokens[0] = app.access_tokens[1]
+            app.access_tokens[1] = app.access_tokens[2]
+            app.access_tokens[2] = session_token
         response.set_cookie(key="session_token", value=session_token)
     else:
         response.status_code = 401
@@ -106,7 +111,13 @@ def login_session(response: Response, credentials: HTTPBasicCredentials = Depend
 def login_session(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
     if credentials.username == "4dm1n" or credentials.password == "NotSoSecurePa$$":
         session_token = sha256(f"4dm1nNotSoSecurePa$${app.secret_key}".encode()).hexdigest()
-        app.login_tokens.append(session_token)
+        if len(app.login_tokens) < 3:
+            app.login_tokens.append(session_token)
+        else:
+            app.login_tokens[0] = app.login_tokens[1]
+            app.login_tokens[1] = app.login_tokens[2]
+            app.login_tokens[2] = session_token
+        response.set_cookie(key="session_token", value=session_token)
     else:
         response.status_code = 401
         raise HTTPException(status_code=401)
@@ -156,7 +167,6 @@ def logout_token(token: str, format: str = ""):
     else:
         app.access_tokens.remove(token)
     return RedirectResponse(url=f"/logged_out?format={format}", status_code=302)
-
 
 @app.get("/logged_out", status_code=200)
 def logged_out(format: str = ""):
