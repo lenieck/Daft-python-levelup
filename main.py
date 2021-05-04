@@ -86,14 +86,4 @@ def patient_view(id: int):
         raise HTTPException(status_code=400)
     else:
         raise HTTPException(status_code=404)
- '''
-   @app.get("/hello", response_class=HTMLResponse)
-def hello():
-    return f"""
-    <html>
-        <body>
-            <h1>Hello! Today date is {datetime.today().strftime('%Y-%m-%d')}</h1>
-        </body>
-    </html>
-    """
-'''
+
