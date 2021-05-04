@@ -100,7 +100,7 @@ def login_session(response: Response, credentials: HTTPBasicCredentials = Depend
     else:
         response.status_code = 401
         raise HTTPException(status_code=401)
-'''
+
 @app.post("/login_token", status_code=201)
 def login_session(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
     if credentials.username == "4dm1n" or credentials.password == "NotSoSecurePa$$":
@@ -110,7 +110,7 @@ def login_session(response: Response, credentials: HTTPBasicCredentials = Depend
         response.status_code = 401
         raise HTTPException(status_code=401)
     return {"token": session_token}
-'''
+
 @app.get("/hello", response_class=HTMLResponse)
 def hello():
     return f"""
