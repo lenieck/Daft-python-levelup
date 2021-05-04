@@ -136,6 +136,37 @@ def welcome_token(response: Response, token: str, format: str = ""):
     else:
         return PlainTextResponse(content="Welcome!")
 
+
+@app.delete("/logout_session")
+def logout_session(session_token: str = Cookie(None), format: str = ""):
+    if (session_token not in app.access_tokens) and (session_token not in app.login_tokens):
+        raise HTTPException(status_code=401)
+    if session_token in app.access_tokens:
+        app.access_tokens.remove(session_token)
+    else:
+        app.login_tokens.remove(session_token)
+    return RedirectResponse(url=f"/logged_out?format={format}", status_code=302)
+
+@app.delete("/logout_token")
+def logout_token(token: str, format: str = ""):
+    if ((token not in app.login_tokens) and (token not in app.access_tokens)) or (token == ""):
+        raise HTTPException(status_code=401)
+    if token in app.login_tokens:
+        app.login_tokens.remove(token)
+    else:
+        app.access_tokens.remove(token)
+    return RedirectResponse(url=f"/logged_out?format={format}", status_code=302)
+
+
+@app.get("/logged_out", status_code=200)
+def logged_out(format: str = ""):
+    if format == 'json':
+        return {"message": "Logged out!"}
+    elif format == 'html':
+        return HTMLResponse(content="<h1>Logged out!</h1>", status_code=200)
+    else:
+        return PlainTextResponse(content="Logged out!", status_code=200)
+
 @app.get("/hello", response_class=HTMLResponse)
 def hello():
     return f"""
