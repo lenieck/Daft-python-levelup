@@ -2,10 +2,12 @@ from fastapi import FastAPI
 from fastapi import FastAPI, Response, status
 from fastapi import FastAPI, HTTPException
 from hashlib import sha512
+from hashlib import sha256
 from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from fastapi.responses import HTMLResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 app = FastAPI()
 app.counter = 0
@@ -87,6 +89,31 @@ def patient_view(id: int):
     else:
         raise HTTPException(status_code=404)
     
+security = HTTPBasic()
+app.secret_key = "very constant and random secret, best 64+ characters"
+app.access_tokens = []
+app.login_tokens = []
+
+@app.post("/login_session", statud_code=201)
+def login_session(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
+    if credentials.username == "4dm1n" or credentials.password == "NotSoSecurePa$$":
+        session_token = sha256(f"4dm1nNotSoSecurePa$${app.secret_key}".encode()).hexdigest()
+        app.access_tokens.append(session_token)
+        response.set_cookie(key="session_token", value=session_token)
+    else:
+        response.status_code = 401
+        raise HTTPException(status_code=401)
+
+@app.post("/login_token", statud_code=201)
+def login_session(response: Response, credentials: HTTPBasicCredentials = Depends(security)):
+    if credentials.username == "4dm1n" or credentials.password == "NotSoSecurePa$$":
+        session_token = sha256(f"4dm1nNotSoSecurePa$${app.secret_key}".encode()).hexdigest()
+        app.login_tokens.append(session_token)
+    else:
+        response.status_code = 401
+        raise HTTPException(status_code=401)
+    return {"token": session_token}
+
 @app.get("/hello", response_class=HTMLResponse)
 def hello():
     return f"""
@@ -98,5 +125,4 @@ def hello():
             <h1>Hello! Today date is {datetime.today().strftime('%Y-%m-%d')}</h1>
         </body>
     </html>
-    """
-
+    """ 
