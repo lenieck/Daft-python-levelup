@@ -91,6 +91,9 @@ def patient_view(id: int):
 def hello():
     return f"""
     <html>
+         <head>
+            <title>Some HTML in here</title>
+        </head>
         <body>
             <h1>Hello! Today date is {datetime.today().strftime('%Y-%m-%d')}</h1>
         </body>
