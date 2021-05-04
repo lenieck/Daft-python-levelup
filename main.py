@@ -1,29 +1,26 @@
-from fastapi import FastAPI
-from fastapi import FastAPI, Response, status
-from fastapi import FastAPI, HTTPException
-from hashlib import sha512
 from hashlib import sha256
+from hashlib import sha512
+from fastapi import FastAPI, Cookie, Depends
+from fastapi import FastAPI, Response, status
+from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, HTTPException
 from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime, timedelta
-from fastapi.responses import HTMLResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+
 
 app = FastAPI()
 app.counter = 0
 app.patients = dict()
 
-@app.get("/")
-def root():
-    return {"message": "Hello world!"}
-
 @app.post("/method", status_code = 201)
 def POST():
     return {"method": "POST"}
 
-@app.get("/method")
-def GET():
-    return {"method": "GET"}
+@app.get("/")
+def root():
+    return {"message": "Hello world!"}
 
 @app.delete("/method")
 def DELETE():
@@ -44,7 +41,7 @@ def auth(password: Optional[str] = None, password_hash: Optional[str] = None):
     password = password.encode()
     if sha512(password).hexdigest() != password_hash:
         raise HTTPException(status_code=401)
-        
+
 class PatientRegister(BaseModel):
     name: str
     surname: str
@@ -88,7 +85,7 @@ def patient_view(id: int):
         raise HTTPException(status_code=400)
     else:
         raise HTTPException(status_code=404)
-    
+
 security = HTTPBasic()
 app.secret_key = "very constant and random secret, best 64+ characters"
 app.access_tokens = []
@@ -125,4 +122,4 @@ def hello():
             <h1>Hello! Today date is {datetime.today().strftime('%Y-%m-%d')}</h1>
         </body>
     </html>
-    """ 
+    """
