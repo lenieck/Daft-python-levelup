@@ -5,6 +5,7 @@ from fastapi import FastAPI, Response, status
 from fastapi.responses import HTMLResponse
 from fastapi import FastAPI, HTTPException
 from typing import Optional
+from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -110,6 +111,30 @@ def login_session(response: Response, credentials: HTTPBasicCredentials = Depend
         response.status_code = 401
         raise HTTPException(status_code=401)
     return {"token": session_token}
+
+
+@app.get("/welcome_session", status_code=200)
+def welcome_session(response: Response, session_token: str = Cookie(None), format: str = ""):
+    if (session_token not in app.access_tokens) or (session_token == ""):
+        raise HTTPException(status_code=401)
+    if format == 'json':
+        return {"message": "Welcome!"}
+    elif format == 'html':
+        return HTMLResponse(content="<h1>Welcome!</h1>")
+    else:
+        return PlainTextResponse(content="Welcome!")
+
+
+@app.get("/welcome_token", status_code=200)
+def welcome_token(response: Response, token: str, format: str = ""):
+    if (token not in app.login_tokens) or (token == ""):
+        raise HTTPException(status_code=401)
+    if format == 'json':
+        return {"message": "Welcome!"}
+    elif format == 'html':
+        return HTMLResponse(content="<h1>Welcome!</h1>")
+    else:
+        return PlainTextResponse(content="Welcome!")
 
 @app.get("/hello", response_class=HTMLResponse)
 def hello():
