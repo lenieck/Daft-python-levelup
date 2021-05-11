@@ -195,10 +195,7 @@ async def shutdown():
 async def get_categories():
     cursor = app.dbc.cursor()
     categories = cursor.execute("SELECT  CategoryID, CategoryName FROM Categories ORDER BY CategoryID").fetchall()
-    result = {"categories": [{"id": x["CategoryID"],
-                           "name": x["CategoryName"]
-                           }
-                          for x in categories]}
+    result = dict(categories=[dict(id=row[0], name=row[1]) for row in categories])
     return result
 
 
@@ -213,4 +210,3 @@ async def get_customers():
         "FROM Customers c ORDER BY UPPER(CustomerID);"
     ).fetchall()
     return dict(customers=customers)
-
