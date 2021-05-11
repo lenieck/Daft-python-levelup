@@ -248,7 +248,7 @@ async def get_employees(limit: int = -1, offset: int = 0, order: str = ''):
 @app.get("/products_extended")
 async def products_extended(response: Response):
     response.status_code = 200
-    cursor = app.db_connection.cursor()
+    cursor = app.dbc.cursor()
     cursor.row_factory = sqlite3.Row
     result = cursor.execute(
         '''SELECT p.ProductID id, p.ProductName name, c.CategoryName category, s.CompanyName supplier
@@ -261,7 +261,7 @@ async def products_extended(response: Response):
 @app.get("/products/{id}/orders")
 async def order_details(response: Response, id: int):
     response.status_code = 200
-    cursor = app.db_connection.cursor()
+    cursor = app.dbc.cursor()
     cursor.row_factory = sqlite3.Row
     result = cursor.execute(
         '''SELECT o.OrderID id, c.CompanyName customer, od.Quantity quantity,ROUND((od.UnitPrice * od.Quantity) - od.Discount * (od.UnitPrice * od.Quantity),2) total_price
@@ -281,19 +281,19 @@ class CreatedCategory(BaseModel):
 
 @app.post("/categories", status_code=201, response_model=CreatedCategory)
 async def create_category(category: Category):
-    cursor = app.db_connection.execute(
+    cursor = app.dbc.execute(
         "INSERT INTO Categories (CategoryName) VALUES (?)", (category.name, ))
-    app.db_connection.commit()
+    app.dbc.commit()
     return {"id": cursor.lastrowid,
             "name": category.name}
 
 
 @app.put("/categories/{id}", status_code=200, response_model=CreatedCategory)
 async def modify_category(category: Category, id: int):
-    cursor = app.db_connection.execute(
+    cursor = app.dbc.execute(
         "UPDATE Categories SET CategoryName = ? WHERE CategoryID = ?", (category.name, id)
     )
-    app.db_connection.commit()
+    app.dbc.commit()
     cursor.row_factory = sqlite3.Row
     created_category = cursor.execute(
         '''SELECT c.CategoryID id, c.CategoryName name 
@@ -306,7 +306,7 @@ async def modify_category(category: Category, id: int):
 
 @app.delete("/categories/{id}", status_code=200)
 async def delete_category(id: int):
-    cursor = app.db_connection.execute(
+    cursor = app.dbc.execute(
         '''SELECT c.CategoryID 
             FROM Categories c 
             WHERE c.CategoryID = :id''', {'id': id})
@@ -315,5 +315,5 @@ async def delete_category(id: int):
     cursor.execute(
         '''DELETE FROM Categories 
             WHERE categoryID = :id''', {"id": id})
-    app.db_connection.commit()
+    app.dbc.commit()
     return {"deleted": 1}
