@@ -195,8 +195,8 @@ async def shutdown():
 async def get_categories():
     cursor = app.dbc.cursor()
     categories = cursor.execute("SELECT  CategoryID, CategoryName FROM Categories ORDER BY CategoryID").fetchall()
-    output = dict(categories=[dict(id=row[0], name=row[1]) for row in categories])
-    return output
+    result = dict(categories=[dict(id=row[0], name=row[1]) for row in categories])
+    return result
 
 
 @app.get("/customers")
@@ -295,12 +295,12 @@ async def modify_category(category: Category, id: int):
     )
     app.dbc.commit()
     cursor.row_factory = sqlite3.Row
-    created_category = cursor.execute(
+    cat = cursor.execute(
         '''SELECT c.CategoryID id, c.CategoryName name 
             FROM Categories c 
             WHERE c.CategoryID = :id''', {"id": id}).fetchone()
-    if created_category:
-        return created_category
+    if cat:
+        return cat
     raise HTTPException(status_code=404)
 
 
