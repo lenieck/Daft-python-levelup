@@ -201,21 +201,24 @@ async def categories():
                           ORDER BY CategoryID;
                           """).fetchall()
     result = {"categories": [{"id": x["CategoryID"],
-                           "name": x["CategoryName"]
-                           }
-                          for x in data]}
+             "name": x["CategoryName"]
+             } 
+            for x in data]}
     return result
-
-
+    
 @app.get("/customers")
 async def customers():
-    cursor = app.dbc.cursor()
+    cursor = app.db_connection.cursor()
     cursor.row_factory = sqlite3.Row
-    customers = cursor.execute(
-        "SELECT CustomerID id, COALESCE(CompanyName, '') name, "
-        "COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || "
-        "COALESCE(Country, '') full_address "
-        "FROM Customers c ORDER BY UPPER(CustomerID);"
-    ).fetchall()
-    return dict(customers=customers)
-
+    data = cursor.execute("""
+                          SELECT CustomerID, CompanyName, COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || COALESCE(Country, '') As FullAddress
+                          FROM Customers
+                          ORDER BY CustomerID COLLATE NOCASE;
+                          """).fetchall()
+    
+    result = {"customers": [{"id": x["CustomerID"],
+             "name": x["CompanyName"],
+             "full_address": x["FullAddress"]
+             }
+            for x in data]}
+    return result
