@@ -182,7 +182,7 @@ def hello():
 
 @app.on_event("startup")
 async def startup():
-    app.dbc = sqlite3.connect("db/northwind/northwind.db")
+    app.dbc = sqlite3.connect("northwind.db")
     app.dbc.text_factory = lambda b: b.decode(errors='ignore')
 
 
