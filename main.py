@@ -1,14 +1,13 @@
 from hashlib import sha256
 from hashlib import sha512
-from fastapi import FastAPI, Cookie, Depends
-from fastapi import FastAPI, Response, status
-from fastapi.responses import HTMLResponse
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Cookie, Depends, Response, status, HTTPException
 from typing import Optional
 from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import sqlite3
+
 
 
 app = FastAPI()
@@ -165,7 +164,7 @@ def logged_out(format: str = ""):
         return HTMLResponse(content="<h1>Logged out!</h1>", status_code=200)
     else:
         return PlainTextResponse(content="Logged out!", status_code=200)
-
+'''
 @app.get("/hello", response_class=HTMLResponse)
 def hello():
     return f"""
@@ -178,3 +177,49 @@ def hello():
         </body>
     </html>
     """
+'''
+#-----------------------4-----------------------
+
+@app.on_event("startup")
+async def startup():
+    app.db_connection = sqlite3.connect("northwind.db")
+    app.db_connection.text_factory = lambda b: b.decode(errors="ignore")
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    app.db_connection.close()
+
+
+@app.get("/categories")
+async def categories():
+    cursor = app.db_connection.cursor()
+    cursor.row_factory = sqlite3.Row
+    data = cursor.execute("""
+                          SELECT CategoryID, CategoryName
+                          FROM Categories
+                          ORDER BY CategoryID;
+                          """).fetchall()
+    result = {"categories": [{"id": x["CategoryID"],
+                           "name": x["CategoryName"]
+                           }
+                          for x in data]}
+    return result
+
+
+@app.get("/customers")
+async def customers():
+    cursor = app.db_connection.cursor()
+    cursor.row_factory = sqlite3.Row
+    data = cursor.execute("""
+                          SELECT CustomerID, CompanyName, COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || COALESCE(Country, '') As FullAddress
+                          FROM Customers
+                          ORDER BY CustomerID;
+                          """).fetchall()
+
+    result = {"customers": [{"id": x["CustomerID"],
+                          "name": x["CompanyName"],
+                          "full_address": x["FullAddress"]
+                          }
+                         for x in data]}
+    return result
