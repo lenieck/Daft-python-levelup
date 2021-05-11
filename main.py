@@ -210,3 +210,24 @@ async def get_customers():
         "FROM Customers c ORDER BY UPPER(CustomerID);"
     ).fetchall()
     return dict(customers=customers)
+
+
+@app.get("/products/{id}")
+async def products_id(id: int):
+    cursor = app.db_connection.cursor()
+    cursor.row_factory = sqlite3.Row
+    data = cursor.execute("""
+                          SELECT ProductId, ProductName
+                          FROM Products
+                          WHERE ProductId = :id;
+                          """, {'id': id}).fetchone()
+    
+    if data is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Wrong"
+        )
+    else:
+        return {
+            "id": data['ProductId'],
+            "name": data["ProductName"]
+        }
