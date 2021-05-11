@@ -224,3 +224,23 @@ async def get_product(id: int):
     if not product:
         raise HTTPException(status_code=404, detail="Wrong")
     return product
+
+@app.get("/employees")
+async def get_employees(response: Response, limit: Optional[int] = -1, offset: Optional[int] = 0,
+                        order: Optional[str] = None):
+    response.status_code = 200
+    cursor = app.db_connection.cursor()
+    cursor.row_factory = sqlite3.Row
+    order_by = ['first_name', 'last_name', 'city']
+    if not any(order == possibility for possibility in order_by) and order is not None:
+        response.status_code = 400
+        return
+    if order is None:
+        order = 'EmployeeID'
+    result = cursor.execute(f"""SELECT EmployeeID id, LastName last_name, FirstName first_name, City city 
+                            FROM Employees e 
+                            ORDER BY {order} 
+                            LIMIT :limit 
+                            OFFSET :offset""",
+                            {'limit': limit, 'offset': offset}).fetchall()
+    return {"employees": result}
