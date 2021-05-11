@@ -225,22 +225,22 @@ async def get_product(id: int):
         raise HTTPException(status_code=404, detail="Wrong")
     return product
 
+emp_orders = {'last_name': 'LastName',
+              'first_name': 'FirstName',
+              'city': 'City',
+              'EmployeeID': 'EmployeeID',
+              '': "EmployeeID"}
+
 @app.get("/employees")
-async def get_employees(response: Response, limit: Optional[int] = -1, offset: Optional[int] = 0,
-                        order: Optional[str] = None):
-    response.status_code = 200
-    cursor = app.db_connection.cursor()
+async def get_employees(limit: int = -1, offset: int = 0, order: str = ''):
+    order = order.strip()
+    if not (isinstance(limit, int) and isinstance(offset, int) and order in emp_orders.keys()):
+        raise HTTPException(status_code=400)
+    cursor = app.dbc.cursor()
     cursor.row_factory = sqlite3.Row
-    order_by = ['first_name', 'last_name', 'city']
-    if not any(order == possibility for possibility in order_by) and order is not None:
-        response.status_code = 400
-        return
-    if order is None:
-        order = 'EmployeeID'
-    result = cursor.execute(f"""SELECT EmployeeID id, LastName last_name, FirstName first_name, City city 
-                            FROM Employees e 
-                            ORDER BY {order} 
-                            LIMIT :limit 
-                            OFFSET :offset""",
-                            {'limit': limit, 'offset': offset}).fetchall()
-    return {"employees": result}
+    employees = cursor.execute(
+        "SELECT EmployeeID id, LastName last_name, FirstName first_name, City city "
+        f"FROM Employees ORDER BY {emp_orders[order]} LIMIT :lim OFFSET :off;"
+        , {"lim": limit, "off": offset}
+    ).fetchall()
+    return dict(employees=employees)
