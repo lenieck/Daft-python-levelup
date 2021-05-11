@@ -180,4 +180,33 @@ def hello():
 '''
 #-----------------------4-----------------------
 
+@app.on_event("startup")
+async def startup():
+    app.dbc = sqlite3.connect("db/northwind/northwind.db")
+    app.dbc.text_factory = lambda b: b.decode(errors='ignore')
 
+
+@app.on_event("shutdown")
+async def shutdown():
+    app.dbc.close()
+
+
+@app.get("/categories")
+async def get_categories():
+    cursor = app.dbc.cursor()
+    categories = cursor.execute("SELECT  CategoryID, CategoryName FROM Categories ORDER BY CategoryID").fetchall()
+    output = dict(categories=[dict(id=row[0], name=row[1]) for row in categories])
+    return output
+
+
+@app.get("/customers")
+async def get_customers():
+    cursor = app.dbc.cursor()
+    cursor.row_factory = sqlite3.Row
+    customers = cursor.execute(
+        "SELECT CustomerID id, COALESCE(CompanyName, '') name, "
+        "COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || "
+        "COALESCE(Country, '') full_address "
+        "FROM Customers c ORDER BY UPPER(CustomerID);"
+    ).fetchall()
+    return dict(customers=customers)
