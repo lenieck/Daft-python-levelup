@@ -191,13 +191,15 @@ async def shutdown():
     app.db_connection.close()
 
 
-
 @app.get("/categories")
 async def get_categories():
     cursor = app.dbc.cursor()
     categories = cursor.execute("SELECT  CategoryID, CategoryName FROM Categories ORDER BY CategoryID").fetchall()
-    output = dict(categories=[dict(id=row[0], name=row[1]) for row in categories])
-    return output
+    result = {"categories": [{"id": x["CategoryID"],
+                           "name": x["CategoryName"]
+                           }
+                          for x in categories]}
+    return result
 
 
 @app.get("/customers")
@@ -208,7 +210,7 @@ async def get_customers():
         "SELECT CustomerID id, COALESCE(CompanyName, '') name, "
         "COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || "
         "COALESCE(Country, '') full_address "
-        "FROM Customers"
-        "ORDER BY CustomerID;"
+        "FROM Customers c ORDER BY UPPER(CustomerID);"
     ).fetchall()
     return dict(customers=customers)
+
