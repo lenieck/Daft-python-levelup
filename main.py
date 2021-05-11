@@ -204,7 +204,7 @@ async def categories():
                            "name": x["CategoryName"]
                            }
                           for x in data]}
-    return result
+    return dict(result)
 
 
 @app.get("/customers")
@@ -222,4 +222,4 @@ async def customers():
                           "full_address": x["FullAddress"]
                           }
                          for x in data]}
-    return result
+    return dict(result)
