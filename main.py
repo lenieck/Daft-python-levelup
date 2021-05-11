@@ -212,7 +212,7 @@ async def customers():
     cursor = app.db_connection.cursor()
     cursor.row_factory = sqlite3.Row
     data = cursor.execute("""
-                          SELECT CustomerID, CompanyName, COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || COALESCE(Country, '') As FullAddress
+                          SELECT CustomerID, CompanyName, (COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || COALESCE(Country, '')) As FullAddress
                           FROM Customers
                           ORDER BY CustomerID;
                           """).fetchall()
