@@ -193,33 +193,20 @@ async def shutdown():
 
 @app.get("/categories")
 async def categories():
-    cursor = app.db_connection.cursor()
-    cursor.row_factory = sqlite3.Row
-    data = cursor.execute("""
-                          SELECT CategoryID, CategoryName
-                          FROM Categories
-                          ORDER BY CategoryID;
-                          """).fetchall()
-    result = {"categories": [{"id": x["CategoryID"],
-                           "name": x["CategoryName"]
-                           }
-                          for x in data]}
-    return dict(result)
+    cursor = app.dbc.cursor()
+    categories = cursor.execute("SELECT  CategoryID, CategoryName FROM Categories ORDER BY CategoryID").fetchall()
+    result = dict(categories=[dict(id=row[0], name=row[1]) for row in categories])
+    return result
 
 
 @app.get("/customers")
 async def customers():
-    cursor = app.db_connection.cursor()
+    cursor = app.dbc.cursor()
     cursor.row_factory = sqlite3.Row
-    data = cursor.execute("""
-                          SELECT CustomerID, CompanyName, COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || COALESCE(Country, '') As FullAddress
-                          FROM Customers
-                          ORDER BY CustomerID;
-                          """).fetchall()
-
-    result = {"customers": [{"id": x["CustomerID"],
-                          "name": x["CompanyName"],
-                          "full_address": x["FullAddress"]
-                          }
-                         for x in data]}
-    return dict(result)
+    customers = cursor.execute(
+        "SELECT CustomerID id, COALESCE(CompanyName, '') name, "
+        "COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || "
+        "COALESCE(Country, '') full_address "
+        "FROM Customers c ORDER BY UPPER(CustomerID);"
+    ).fetchall()
+    return dict(customers=customers)
