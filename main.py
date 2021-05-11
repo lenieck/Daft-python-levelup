@@ -191,6 +191,7 @@ async def shutdown():
     app.db_connection.close()
 
 
+
 @app.get("/categories")
 async def get_categories():
     cursor = app.dbc.cursor()
@@ -207,6 +208,7 @@ async def get_customers():
         "SELECT CustomerID id, COALESCE(CompanyName, '') name, "
         "COALESCE(Address, '') || ' ' || COALESCE(PostalCode, '') || ' ' || COALESCE(City, '') || ' ' || "
         "COALESCE(Country, '') full_address "
-        "FROM Customers c ORDER BY UPPER(CustomerID);"
+        "FROM Customers"
+        "ORDER BY CustomerID;"
     ).fetchall()
     return dict(customers=customers)
