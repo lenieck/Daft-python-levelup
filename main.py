@@ -211,23 +211,16 @@ async def get_customers():
     ).fetchall()
     return dict(customers=customers)
 
-
 @app.get("/products/{id}")
-async def products_id(id: int):
-    cursor = app.db_connection.cursor()
+async def get_product(id: int):
+    if not isinstance(id, int):
+        raise HTTPException(status_code=404, detail="Wrong")
+    cursor = app.dbc.cursor()
     cursor.row_factory = sqlite3.Row
-    data = cursor.execute("""
-                          SELECT ProductId, ProductName
-                          FROM Products
-                          WHERE ProductId = :id;
-                          """, {'id': id}).fetchone()
-    
-    if data is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Wrong"
-        )
-    else:
-        return {
-            "id": data['ProductId'],
-            "name": data["ProductName"]
-        }
+    product = cursor.execute(
+        "SELECT ProductID id, RTRIM(ProductName) name FROM Products p WHERE ProductID = ?",
+        (id,)
+    ).fetchone()
+    if not product:
+        raise HTTPException(status_code=404, detail="Wrong")
+    return product
