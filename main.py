@@ -195,8 +195,8 @@ async def shutdown():
 async def get_categories():
     cursor = app.dbc.cursor()
     categories = cursor.execute("SELECT  CategoryID, CategoryName FROM Categories ORDER BY CategoryID").fetchall()
-    result = dict(categories=[dict(id=row[0], name=row[1]) for row in categories])
-    return result
+    output = dict(categories=[dict(id=row[0], name=row[1]) for row in categories])
+    return output
 
 
 @app.get("/customers")
